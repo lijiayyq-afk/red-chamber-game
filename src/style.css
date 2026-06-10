@@ -478,8 +478,8 @@ body {
   position: absolute;
   bottom: 30px;
   left: 30px;
-  width: 160px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
   background: rgba(252, 250, 242, 0.65); /* 宣纸微透 */
   backdrop-filter: blur(5px);
   border: 2px solid var(--gold-juan);
@@ -492,10 +492,10 @@ body {
 /* D-pad 圆盘正中心的玉佩雕花图案装饰 */
 .dpad-center-decor {
   position: absolute;
-  top: 50px;
-  left: 50px;
-  width: 60px;
-  height: 60px;
+  top: 54px;
+  left: 54px;
+  width: 72px;
+  height: 72px;
   border: 1.5px dashed rgba(44, 94, 67, 0.3);
   border-radius: 50%;
   display: flex;
@@ -511,8 +511,8 @@ body {
 /* 虚拟方向按钮 */
 .dpad-btn {
   position: absolute;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   background: linear-gradient(135deg, #fbfaf5, #f0ede4); /* 玉米黄古纸纸感 */
   border: 1.5px solid var(--gold-juan);
   border-radius: 50%;
@@ -528,9 +528,10 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: none; /* js接管滑动，此处设为 none 穿透 */
 }
 
-.dpad-btn:active {
+.dpad-btn.active {
   transform: scale(0.9);
   background: var(--gold-juan);
   color: var(--red-zhu);
@@ -540,19 +541,19 @@ body {
 /* 上下左右定位 */
 .dpad-btn.up {
   top: 6px;
-  left: 58px;
+  left: 64px;
 }
 .dpad-btn.down {
   bottom: 6px;
-  left: 58px;
+  left: 64px;
 }
 .dpad-btn.left {
   left: 6px;
-  top: 58px;
+  top: 64px;
 }
 .dpad-btn.right {
   right: 6px;
-  top: 58px;
+  top: 64px;
 }
 
 /* 右下角功能键容器 */

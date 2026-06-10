@@ -1937,6 +1937,7 @@ initAudioOnUserInteraction();
 };
 
 function initMobileControls(): void {
+  const dpad = document.querySelector('.dpad-container') as HTMLElement;
   const upBtn = document.getElementById('dpad-up');
   const downBtn = document.getElementById('dpad-down');
   const leftBtn = document.getElementById('dpad-left');
@@ -1944,8 +1945,9 @@ function initMobileControls(): void {
   const navBtn = document.getElementById('action-nav');
   const interactBtn = document.getElementById('action-interact');
 
-  if (!upBtn || !downBtn || !leftBtn || !rightBtn || !navBtn || !interactBtn) return;
+  if (!dpad || !upBtn || !downBtn || !leftBtn || !rightBtn || !navBtn || !interactBtn) return;
 
+  // 1. 绑定辅助功能按键 (不变，继续使用轻点/按住逻辑)
   const bindPress = (btn: HTMLElement, key: string) => {
     const start = (e: Event) => {
       e.preventDefault();
@@ -1964,12 +1966,101 @@ function initMobileControls(): void {
     btn.addEventListener('touchcancel', end);
   };
 
-  bindPress(upBtn, 'up');
-  bindPress(downBtn, 'down');
-  bindPress(leftBtn, 'left');
-  bindPress(rightBtn, 'right');
   bindPress(navBtn, 'nav');
   bindPress(interactBtn, 'interact');
+
+  // 2. 摇杆手势重构：直接在 dpad-container 上实现滑动捕获
+  let activePointerId: number | null = null;
+
+  const updateDirections = (clientX: number, clientY: number) => {
+    const rect = dpad.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+
+    const threshold = 15; // 盲区阈值（像素）
+    
+    // 初始化清空
+    (window as any).mobileControls.up = false;
+    (window as any).mobileControls.down = false;
+    (window as any).mobileControls.left = false;
+    (window as any).mobileControls.right = false;
+
+    // 清空高亮状态
+    upBtn.classList.remove('active');
+    downBtn.classList.remove('active');
+    leftBtn.classList.remove('active');
+    rightBtn.classList.remove('active');
+
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (absDx < threshold && absDy < threshold) {
+      return; // 离中心太近，死区不触发
+    }
+
+    // 多方向/斜向移动判定算法
+    // 如果手指偏向某个方向，激活该方向移动并使方向键高亮
+    if (absDx > threshold) {
+      if (dx > 0) {
+        (window as any).mobileControls.right = true;
+        rightBtn.classList.add('active');
+      } else {
+        (window as any).mobileControls.left = true;
+        leftBtn.classList.add('active');
+      }
+    }
+
+    if (absDy > threshold) {
+      if (dy > 0) {
+        (window as any).mobileControls.down = true;
+        downBtn.classList.add('active');
+      } else {
+        (window as any).mobileControls.up = true;
+        upBtn.classList.add('active');
+      }
+    }
+  };
+
+  const handlePointerDown = (e: PointerEvent) => {
+    e.preventDefault();
+    dpad.setPointerCapture(e.pointerId);
+    activePointerId = e.pointerId;
+    updateDirections(e.clientX, e.clientY);
+  };
+
+  const handlePointerMove = (e: PointerEvent) => {
+    if (activePointerId === e.pointerId) {
+      e.preventDefault();
+      updateDirections(e.clientX, e.clientY);
+    }
+  };
+
+  const handlePointerUp = (e: PointerEvent) => {
+    if (activePointerId === e.pointerId) {
+      e.preventDefault();
+      dpad.releasePointerCapture(e.pointerId);
+      activePointerId = null;
+
+      // 重置所有状态和高亮
+      (window as any).mobileControls.up = false;
+      (window as any).mobileControls.down = false;
+      (window as any).mobileControls.left = false;
+      (window as any).mobileControls.right = false;
+
+      upBtn.classList.remove('active');
+      downBtn.classList.remove('active');
+      leftBtn.classList.remove('active');
+      rightBtn.classList.remove('active');
+    }
+  };
+
+  dpad.addEventListener('pointerdown', handlePointerDown);
+  dpad.addEventListener('pointermove', handlePointerMove);
+  dpad.addEventListener('pointerup', handlePointerUp);
+  dpad.addEventListener('pointercancel', handlePointerUp);
 }
 
 function resizeApp(): void {

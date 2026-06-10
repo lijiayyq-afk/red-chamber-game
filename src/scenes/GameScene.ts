@@ -26,6 +26,8 @@ export class GameScene extends Phaser.Scene {
   // 记录角色朝向
   private lastDirection = 'down';
   private fromScene = '';
+  private lastSafeX = 800;
+  private lastSafeY = 700;
 
   constructor() {
     super('GameScene');
@@ -118,13 +120,13 @@ export class GameScene extends Phaser.Scene {
 
     // 6. 渲染主角宝玉 (物理动态精灵)
     this.player = this.physics.add.sprite(this.startX, this.startY, 'baoyu');
-    this.player.setScale(0.25);
+    this.player.setScale(0.15);
     this.player.setCollideWorldBounds(true);
     
-    // 调整物理阻挡体积只在脚底 (宽度 60, 高度 30，偏移量向下移)
+    // 调整物理阻挡体积只在脚底
     const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-    playerBody.setSize(60, 30);
-    playerBody.setOffset(98, 195);
+    playerBody.setSize(50, 25);
+    playerBody.setOffset(103, 220);
 
     // 7. 配置主镜头平滑跟随宝玉
     this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
@@ -132,8 +134,8 @@ export class GameScene extends Phaser.Scene {
     // 8. 建立金色旋转环与呼吸光效同步
     const playerBorder = this.add.graphics();
     playerBorder.lineStyle(2, 0xd8c3a5, 0.8);
-    playerBorder.strokeCircle(0, 0, 24);
-    playerBorder.generateTexture('player_ring', 50, 50);
+    playerBorder.strokeCircle(0, 0, 16);
+    playerBorder.generateTexture('player_ring', 34, 34);
     playerBorder.destroy();
 
     const ring = this.add.image(this.startX, this.startY, 'player_ring');
@@ -153,28 +155,17 @@ export class GameScene extends Phaser.Scene {
 
     // 9. 渲染薛宝钗 NPC 精灵 (静立在滴翠亭旁)
     this.baochaiNPC = this.physics.add.sprite(1400, 880, 'baochai');
-    this.baochaiNPC.setScale(0.25).setImmovable(true);
+    this.baochaiNPC.setScale(0.15).setImmovable(true);
+    const bcBody = this.baochaiNPC.body as Phaser.Physics.Arcade.Body;
+    bcBody.setSize(50, 25);
+    bcBody.setOffset(103, 220);
     this.baochaiNPC.anims.play('baochai-idle-down', true);
 
-    // 10. 大观园水墨地形隐形阻挡区域（防止穿墙）
-    const obstacles = this.physics.add.staticGroup();
-    const addStaticWall = (x: number, y: number, w: number, h: number) => {
-      const wall = this.add.zone(x, y, w, h);
-      this.physics.add.existing(wall, true);
-      obstacles.add(wall);
-    };
-
-    // 绘制隐形阻挡体积
-    addStaticWall(800, 630, 480, 160);  // 1. 中央大湖泊水池
-    addStaticWall(1350, 320, 260, 160); // 2. 右侧山石亭台
-    addStaticWall(150, 750, 160, 240);  // 3. 左侧潇湘馆外翠竹林
-    addStaticWall(200, 390, 280, 100);  // 4. 潇湘馆正房及后院墙
-    addStaticWall(800, 90, 320, 90);    // 5. 怡红院正房及后院墙
-    addStaticWall(1400, 830, 120, 70);  // 6. 滴翠亭水榭假山
-
-    // 绑定物理碰撞
-    this.physics.add.collider(this.player, obstacles);
+    // 绑定物理碰撞 (移除 obstacles，角色物理碰撞仅针对宝钗NPC即可，移动范围由路网检测进行滑移纠偏)
     this.physics.add.collider(this.player, this.baochaiNPC);
+
+    this.lastSafeX = this.startX;
+    this.lastSafeY = this.startY;
 
     // 11. 放置场景传送门，走入大门自动切镜切换至室内场景！
     // 传送门 1：通往 潇湘馆 室内场景
@@ -235,6 +226,38 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(): void {
+    // 1. 大观园水墨路网范围平滑限制及双轴滑动回退
+    const px = this.player.x;
+    const py = this.player.y;
+
+    const isWalkable = (x: number, y: number) => {
+      // 5个可通行通道矩形区域
+      const zones = [
+        { x1: 740, x2: 860, y1: 120, y2: 1050 },    // 怡红院南北主干道
+        { x1: 150, x2: 1450, y1: 680, y2: 820 },   // 中部东西横向主道
+        { x1: 150, x2: 350, y1: 420, y2: 850 },    // 左下潇湘馆支道
+        { x1: 1220, x2: 1450, y1: 150, y2: 950 },  // 右侧假山滴翠亭支道
+        { x1: 800, x2: 1350, y1: 150, y2: 250 }    // 右上横向支道
+      ];
+      return zones.some(z => x >= z.x1 && x <= z.x2 && y >= z.y1 && y <= z.y2);
+    };
+
+    if (!isWalkable(px, py)) {
+      // 双轴滑动纠偏
+      if (isWalkable(this.lastSafeX, py)) {
+        this.player.x = this.lastSafeX;
+      } else if (isWalkable(px, this.lastSafeY)) {
+        this.player.y = this.lastSafeY;
+      } else {
+        this.player.x = this.lastSafeX;
+        this.player.y = this.lastSafeY;
+      }
+      this.player.setVelocity(0, 0);
+    } else {
+      this.lastSafeX = px;
+      this.lastSafeY = py;
+    }
+
     const dialogueBox = document.getElementById('dialogue-box');
     const puzzleOverlay = document.getElementById('puzzle-overlay');
     if (

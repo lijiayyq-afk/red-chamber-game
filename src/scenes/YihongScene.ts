@@ -60,22 +60,22 @@ export class YihongScene extends Phaser.Scene {
 
     // 3. 渲染晴雯像素NPC (不再代用薛宝钗图片)
     this.qingwenSprite = this.physics.add.sprite(width / 2 + 120, height / 2 - 50, 'qingwen');
-    this.qingwenSprite.setScale(0.25);
+    this.qingwenSprite.setScale(0.15);
     this.qingwenSprite.setImmovable(true);
 
     const qwBody = this.qingwenSprite.body as Phaser.Physics.Arcade.Body;
-    qwBody.setSize(60, 30);
-    qwBody.setOffset(98, 195);
+    qwBody.setSize(50, 25);
+    qwBody.setOffset(103, 220);
 
     // 晴雯面向左静立
     this.qingwenSprite.anims.play('qingwen-idle-left', true);
 
     // 晴雯红圈环绕
-    const ring = this.add.arc(this.qingwenSprite.x, this.qingwenSprite.y + 12, 24, 0, 360, false, 0xb22d2d, 0.15);
+    const ring = this.add.arc(this.qingwenSprite.x, this.qingwenSprite.y + 12, 16, 0, 360, false, 0xb22d2d, 0.15);
     ring.setStrokeStyle(1.5, 0xb22d2d, 0.6);
     this.tweens.add({
       targets: ring,
-      radius: 48,
+      radius: 32,
       alpha: 0,
       duration: 3000,
       repeat: -1
@@ -83,12 +83,12 @@ export class YihongScene extends Phaser.Scene {
 
     // 4. 渲染宝玉物理动态精灵
     this.player = this.physics.add.sprite(width / 2 - 120, height - 150, 'baoyu');
-    this.player.setScale(0.25);
+    this.player.setScale(0.15);
     this.player.setCollideWorldBounds(true);
 
     const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-    playerBody.setSize(60, 30);
-    playerBody.setOffset(98, 195);
+    playerBody.setSize(50, 25);
+    playerBody.setOffset(103, 220);
 
     // 5. 怡红院室内物理阻挡（红木架、后室屏风等）
     const obstacles = this.physics.add.staticGroup();

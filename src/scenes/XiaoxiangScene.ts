@@ -60,23 +60,23 @@ export class XiaoxiangScene extends Phaser.Scene {
 
     // 3. 渲染黛玉像素NPC
     this.daiyuSprite = this.physics.add.sprite(width / 2 + 100, height / 2, 'daiyu');
-    this.daiyuSprite.setScale(0.25);
+    this.daiyuSprite.setScale(0.15);
     this.daiyuSprite.setImmovable(true);
     
     // 黛玉阻挡体积
     const dyBody = this.daiyuSprite.body as Phaser.Physics.Arcade.Body;
-    dyBody.setSize(60, 30);
-    dyBody.setOffset(98, 195);
+    dyBody.setSize(50, 25);
+    dyBody.setOffset(103, 220);
     
     // 让黛玉面向左边坐下/静立
     this.daiyuSprite.anims.play('daiyu-idle-left', true);
 
     // 黛玉脚下环绕淡淡的清幽波纹
-    const ring = this.add.arc(this.daiyuSprite.x, this.daiyuSprite.y + 12, 24, 0, 360, false, 0x2c5e43, 0.15);
+    const ring = this.add.arc(this.daiyuSprite.x, this.daiyuSprite.y + 12, 16, 0, 360, false, 0x2c5e43, 0.15);
     ring.setStrokeStyle(1.5, 0x2c5e43, 0.6);
     this.tweens.add({
       targets: ring,
-      radius: 48,
+      radius: 32,
       alpha: 0,
       duration: 3000,
       repeat: -1
@@ -84,12 +84,12 @@ export class XiaoxiangScene extends Phaser.Scene {
 
     // 4. 渲染贾宝玉行走精灵 (物理动态精灵，初始出现在大门上方)
     this.player = this.physics.add.sprite(width / 2 - 120, height - 150, 'baoyu');
-    this.player.setScale(0.25);
+    this.player.setScale(0.15);
     this.player.setCollideWorldBounds(true);
     
     const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-    playerBody.setSize(60, 30);
-    playerBody.setOffset(98, 195);
+    playerBody.setSize(50, 25);
+    playerBody.setOffset(103, 220);
 
     // 5. 室内物理阻挡（顶端翠竹林、花案等）
     const obstacles = this.physics.add.staticGroup();
