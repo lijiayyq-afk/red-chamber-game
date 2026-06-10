@@ -24,6 +24,16 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <!-- Phaser 渲染画布容器 -->
   <div id="game-container"></div>
 
+  <!-- 全屏游玩挂件（精美小玉佩） -->
+  <div id="hud-fullscreen-btn" class="hud-fullscreen-btn" style="position: absolute; top: 20px; right: 74px; z-index: 100; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold-juan); background: var(--bg-paper); box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: opacity 0.3s ease, transform 0.2s ease;">
+    <!-- 古典方孔圆钱 SVG 挂件 -->
+    <svg viewBox="0 0 64 64" style="width: 20px; height: 20px; fill: var(--red-zhu); margin-top: 2px;">
+      <path d="M32,2A30,30,0,1,0,62,32,30,30,0,0,0,32,2Zm0,54A24,24,0,1,1,56,32,24,24,0,0,1,32,56Z"/>
+      <rect x="24" y="24" width="16" height="16" style="fill:none;stroke:var(--red-zhu);stroke-width:4;"/>
+    </svg>
+    <div id="fullscreen-btn-text" style="font-family: var(--font-cursive); font-size: 0.62rem; color: var(--red-zhu); font-weight: bold; margin-top: -1px; margin-bottom: 2px;">全屏</div>
+  </div>
+
   <!-- HUD 展开挂坠（精美小玉佩） -->
   <div id="hud-toggle-btn" class="hud-toggle-btn" style="position: absolute; top: 20px; right: 20px; z-index: 100; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold-juan); background: var(--bg-paper); box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: opacity 0.3s ease, transform 0.2s ease;">
     <!-- 古典玉佩 SVG 挂件 -->
@@ -58,20 +68,23 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <span class="status-value" id="hud-chapter">第一回 黛玉进府</span>
     </div>
     <!-- 快速选关/跳转回目 -->
-    <div class="status-item" style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+    <div class="status-item" style="margin-top: 6px; display: flex; align-items: center; gap: 8px; position: relative;">
       <span class="status-label" style="font-weight: bold;">回目跳转:</span>
-      <select id="chapter-select" style="background: var(--bg-paper); border: 1px solid var(--gold-juan); border-radius: 4px; padding: 2px 6px; font-family: var(--font-serif); font-size: 0.82rem; color: var(--text-ink); cursor: pointer; outline: none; transition: border-color 0.2s;">
-        <option value="1">第一回 黛玉进府</option>
-        <option value="2">第二回 宝黛初见</option>
-        <option value="3">第三回 金锁金印</option>
-        <option value="4">第四回 题大观园</option>
-        <option value="5">第五回 宝钗扑蝶</option>
-        <option value="6">第六回 黛玉葬花</option>
-        <option value="7">第七回 晴雯撕扇</option>
-        <option value="8">第八回 怡红挨打</option>
-        <option value="9">第九回 两宴酒令</option>
-        <option value="10">第十回 抄检风波</option>
-      </select>
+      <div class="chapter-custom-select" id="chapter-custom-select">
+        <div class="chapter-select-btn" id="chapter-select-btn">第一回 黛玉进府</div>
+        <div class="chapter-dropdown-list" id="chapter-dropdown-list">
+          <div class="chapter-dropdown-item active" data-value="1">第一回 黛玉进府</div>
+          <div class="chapter-dropdown-item" data-value="2">第二回 宝黛初见</div>
+          <div class="chapter-dropdown-item" data-value="3">第三回 金锁金印</div>
+          <div class="chapter-dropdown-item" data-value="4">第四回 题大观园</div>
+          <div class="chapter-dropdown-item" data-value="5">第五回 宝钗扑蝶</div>
+          <div class="chapter-dropdown-item" data-value="6">第六回 黛玉葬花</div>
+          <div class="chapter-dropdown-item" data-value="7">第七回 晴雯撕扇</div>
+          <div class="chapter-dropdown-item" data-value="8">第八回 怡红挨打</div>
+          <div class="chapter-dropdown-item" data-value="9">第九回 两宴酒令</div>
+          <div class="chapter-dropdown-item" data-value="10">第十回 抄检风波</div>
+        </div>
+      </div>
     </div>
     <div class="status-item">
       <span class="status-label">黛玉羁绊:</span>
@@ -160,6 +173,41 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="ink-alert-title" id="ink-alert-title">题识</div>
       <div class="ink-alert-text" id="ink-alert-text">内容</div>
       <button class="ancient-btn" id="ink-alert-btn">知晓</button>
+    </div>
+  </div>
+
+  <!-- 移动端虚拟手柄 -->
+  <div id="mobile-controller">
+    <!-- D-pad 十字方向键 -->
+    <div class="dpad-container">
+      <div class="dpad-center-decor">大观园</div>
+      <div class="dpad-btn up" id="dpad-up">上</div>
+      <div class="dpad-btn down" id="dpad-down">下</div>
+      <div class="dpad-btn left" id="dpad-left">左</div>
+      <div class="dpad-btn right" id="dpad-right">右</div>
+    </div>
+    <!-- 右侧功能键：交互与寻航 -->
+    <div class="action-container">
+      <div class="action-btn-nav" id="action-nav">
+        寻
+        <span>导航</span>
+      </div>
+      <div class="action-btn-interact" id="action-interact">
+        交
+        <span>E键</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 红楼研读札记学术小课堂浮层 -->
+  <div class="notebook-overlay" id="notebook-overlay">
+    <div class="notebook-card">
+      <div class="notebook-title" id="notebook-title">第一回 研读札记</div>
+      <div class="notebook-section-title">🎋 意象与礼法</div>
+      <div class="notebook-body" id="notebook-body"></div>
+      <div class="notebook-footer">
+        <button class="ancient-btn" id="notebook-close-btn">合卷重游</button>
+      </div>
     </div>
   </div>
 `;
@@ -473,6 +521,88 @@ function showInkAlert(title: string, text: string, callback?: () => void, btnTex
   };
 }
 
+const redChamberNotebooks: Record<number, { title: string; subtitle: string; content: string }> = {
+  1: {
+    title: '第一回 研读札记',
+    subtitle: '🎋 步步留心，时时在意',
+    content: '<b>【饭后茶仪礼法】</b><br/>原著第三回中，林黛玉初进荣国府。饭后，丫鬟用捧茶漆盘端上“老君眉”茶水，并备有漱口盂。黛玉见贾府众人皆不先饮，而是含茶漱口，吐在吐盂中，然后洗手，最后才捧起新端来的“普洱茶”细细品饮。黛玉暗忖：“这正是高门大族的规矩，若直接喝了，必惹人耻笑。” 于是顺随其礼。这体现了黛玉“步步留心，时时在意”的谨慎性格，也展示了金陵世家钟鸣鼎食之家的繁文缛礼与深厚体统。'
+  },
+  2: {
+    title: '第二回 研读札记',
+    subtitle: '💎 摔玉谶语，顽石红尘',
+    content: '<b>【通灵宝玉之谜】</b><br/>贾宝玉落胎时口中衔来之玉，正面刻有“莫失莫忘，仙寿恒昌”。在原著中，此玉乃女娲炼石补天所剩的一块顽石，因未得录用，自怨自愧，后被茫茫大士、渺渺真人带入红尘。宝玉“摔玉”是原著极具反叛色彩的经典情节，宝玉认为“家里姐姐妹妹都没有，单我有，可见不是个好东西”，体现了他对封建门第、男女尊卑观念的蔑视。而这块通灵宝玉也隐喻了贾宝玉红尘历劫的生命主线。'
+  },
+  3: {
+    title: '第三回 研读札记',
+    subtitle: '💍 金石相配，良缘谶语',
+    content: '<b>【金玉良缘与木石前盟】</b><br/>薛宝钗的金锁上錾着“不离不弃，芳龄永继”八个字，与宝玉之玉恰好配成一对，世人称之为“金玉良缘”。然而，宝玉心中所念，唯有与黛玉的“木石前盟”（神瑛侍者以甘露灌溉绛珠仙草，黛玉下凡以一生之泪偿还）。金锁是薛家主动迎合世俗规范的政治联姻象征，而木石前盟则是超脱封建礼教的精神契合。两者在原著中构成了宏大的悲剧拉扯。'
+  },
+  4: {
+    title: '第四回 研读札记',
+    subtitle: '🏡 题大观园，寄寓前缘',
+    content: '<b>【题匾命名巧思】</b><br/>大观园为元妃省亲所建。贾政考校宝玉才华，命其为各处阁馆题匾。宝玉根据竹林幽韵，题“有凤来仪”（后为潇湘馆），隐喻黛玉的清高凤仪；根据杜衡草香，题“蘅芷清芬”（后为蘅芜苑），凸显宝钗的冷香素雅；根据红梅绿芭蕉，题“红香绿玉”（后被元妃改为“怡红快绿”并定名怡红院）。宝玉的题额展现了他高超的诗学才情，贾政虽口头啐骂，心中实则暗自赞许。'
+  },
+  5: {
+    title: '第五回 研读札记',
+    subtitle: '🦋 滴翠扑蝶，机敏避嫌',
+    content: '<b>【宝钗戏蝶与小红心事】</b><br/>原著第二十七回，宝钗扑蝶至滴翠亭，无意间听到了小红（林红玉）与坠儿关于与贾芸私相授受帕子的密谋。在封建礼教中，私传表记乃是大忌。宝钗为防被撞破尴尬，假装追赶林黛玉并喊着“颦儿，我看你往哪里躲”，巧妙脱身，使小红误以为是黛玉听去。此情节一展宝钗临机应变的玲珑心思，但也常被后世读者视作黛钗性格对比的争议细节，展现了其深谙人情世故的“雪里金簪”个性。'
+  },
+  6: {
+    title: '第六回 研读札记',
+    subtitle: '🌸 葬花吟哦，香魂谶语',
+    content: '<b>【黛玉葬花与葬花吟】</b><br/>原著第二十七回中，因被晴雯误拒门外，黛玉伤心之下，清晨在桃花树下荷锄葬花，吟诵出千古绝唱《葬花吟》。“花谢花飞花满天，红消香断有谁怜……” 黛玉不愿让落花落入污浊的沟渠，而是盛入落花绢袋，葬于花冢，以保其洁净。这既是她“孤标傲世”的情感宣泄，更是一首生命谶语——“质本洁来还洁去，强于污淖陷渠沟”，预示了她终将泪尽夭亡的凄美结局。'
+  },
+  7: {
+    title: '第七回 研读札记',
+    subtitle: '撕扇一笑，千金纵性',
+    content: '<b>【晴雯撕扇的反叛性】</b><br/>原著第三十一回，晴雯不慎跌折了宝玉的扇骨，引来宝玉叹息，两人爆发口角。晚间宝玉吃酒回来，为哄晴雯开心，主动拿折扇让晴雯撕，并言“古人云千金难买一笑，扇子原是人用的，你喜欢撕就撕。” 晴雯连撕数把，笑称“听这个声响最痛快”。撕扇一节，生动展示了晴雯孤傲不屈、任性直爽的“爆炭”性格，也体现了宝玉对丫鬟人格尊重的超脱态度，是红楼梦里最温情而叛逆的一幕。'
+  },
+  8: {
+    title: '第八回 研读札记',
+    subtitle: '💥 挨打风波，礼教压迫',
+    content: '<b>【宝玉挨打的社会冲突】</b><br/>原著第三十三回，因金钏儿投井、结交忠顺王府戏子琪官（蒋玉菡）、以及贾环挑拨宝玉强奸未遂等数罪并罚，贾政痛笞宝玉，几乎将其打死。这场“挨打”是贾府父子矛盾的集中爆发，本质上是封建理学道统（贾政代表的立身扬名、仕途经济）与追求真性情、反抗禄蠹科举的叛逆思想（宝玉代表的离经叛道）之间的不可调和的剧烈冲突。'
+  },
+  9: {
+    title: '第九回 研读札记',
+    subtitle: '🎭 藕香令官，伏笔艳词',
+    content: '<b>【牙牌令的命运伏笔】</b><br/>原著第四十回中，贾母在藕香榭设宴，鸳鸯担任令官行牙牌令。黛玉在仓促对令时，脱口而出了《牡丹亭》中的“良辰美景奈何天”与《西厢记》中的“纱窗也没有红娘报”等杂剧词句。在当时，闺阁女子读这类儿女私情之书被视为不轨。宝钗听出了端倪，席后以此善意审问黛玉，不仅没有告发，反而推心置腹地劝导，从此黛钗释嫌和好，谱写了“金兰契互剖金兰语”的温情篇章。'
+  },
+  10: {
+    title: '第十回 研读札记',
+    subtitle: '🥀 抄检大观园，自毁之始',
+    content: '<b>【抄检风波与家族衰败】</b><br/>因在园中捡到绣春囊，邢夫人发难，王熙凤被迫率人抄检大观园。这是大观园毁灭的起点。探春在抄检中大怒，控诉道：“百足之虫，死而不僵。必须先从家里自杀自灭起来，才能杀得死！” 并掴了搜身的王善保家的一记耳光，展现了探春惊人的政治远见。抄检导致晴雯病中被逐、芳官等人出家，预示着这个钟鸣鼎食之家已从内部彻底腐烂，大厦将倾。'
+  }
+};
+
+function showRedChamberNotebook(chapterId: number, callback?: () => void): void {
+  const notebook = redChamberNotebooks[chapterId];
+  if (!notebook) {
+    if (callback) callback();
+    return;
+  }
+
+  const overlay = document.getElementById('notebook-overlay')!;
+  const titleEl = document.getElementById('notebook-title')!;
+  const bodyEl = document.getElementById('notebook-body')!;
+  const closeBtn = document.getElementById('notebook-close-btn')!;
+
+  titleEl.innerText = notebook.title;
+  bodyEl.innerHTML = `
+    <div class="notebook-section-title">${notebook.subtitle}</div>
+    <div style="margin-top: 10px; text-indent: 2em; text-align: justify; color: #333; line-height: 1.8;">
+      ${notebook.content}
+    </div>
+  `;
+
+  overlay.classList.add('show');
+  playSuccessSound();
+
+  closeBtn.onclick = () => {
+    overlay.classList.remove('show');
+    if (callback) callback();
+  };
+}
+
 // 4. HUD 属性刷新
 function updateHUD(): void {
   const state = stateManager.getState();
@@ -505,11 +635,21 @@ function updateHUD(): void {
   document.getElementById('val-baochai-economic')!.innerText = state.baochaiEconomic.toString();
   document.getElementById('val-qingwen-pride')!.innerText = state.qingwenPride.toString();
 
-  // 同步选关下拉框选项值
-  const selectEl = document.getElementById('chapter-select') as HTMLSelectElement;
-  if (selectEl) {
-    selectEl.value = state.currentChapter.toString();
+  // 同步自定义选关下拉菜单的文字与高亮状态
+  const selectBtn = document.getElementById('chapter-select-btn');
+  if (selectBtn) {
+    const name = chapterNames[state.currentChapter] || `第${state.currentChapter}回`;
+    selectBtn.innerText = name;
   }
+  const dropdownItems = document.querySelectorAll('.chapter-dropdown-item');
+  dropdownItems.forEach(item => {
+    const val = parseInt(item.getAttribute('data-value') || '0', 10);
+    if (val === state.currentChapter) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
 
   // 更新回目指引锦囊
   const guide = redChamberGuides[state.currentChapter];
@@ -585,6 +725,9 @@ function renderDialogueNode(): void {
 
   if (!node) {
     dialogueBox.style.display = 'none';
+    if ((window as any).showMobileController) {
+      (window as any).showMobileController(true);
+    }
     // 检查解谜是否也没开，没开就重新显示目标
     const puzzleOverlay = document.getElementById('puzzle-overlay')!;
     if (puzzleOverlay.style.display === 'none') {
@@ -597,6 +740,9 @@ function renderDialogueNode(): void {
   // 对话显示时隐藏顶端目标，保持画面整洁
   targetBanner.style.opacity = '0';
   dialogueBox.style.display = 'flex';
+  if ((window as any).showMobileController) {
+    (window as any).showMobileController(false);
+  }
   document.getElementById('dialogue-speaker')!.innerText = node.speaker;
 
   const textElement = document.getElementById('dialogue-text')!;
@@ -695,15 +841,24 @@ function renderDialogueNode(): void {
       if (dialogueEngine.isEnded()) {
         dialogueBox.style.display = 'none';
         
-        if (stateManager.getState().currentChapter < 10) {
-          stateManager.nextChapter();
-          updateHUD();
-          if (stateManager.getState().currentChapter === 2) {
-            dialogueEngine.startChapter(2);
-            renderDialogueNode();
+        const currentCh = stateManager.getState().currentChapter;
+        const nextStep = () => {
+          if (stateManager.getState().currentChapter < 10) {
+            stateManager.nextChapter();
+            updateHUD();
+            if (stateManager.getState().currentChapter === 2) {
+              dialogueEngine.startChapter(2);
+              renderDialogueNode();
+            }
+          } else {
+            triggerEnding();
           }
+        };
+
+        if (currentCh === 8) {
+          showRedChamberNotebook(8, nextStep);
         } else {
-          triggerEnding();
+          nextStep();
         }
       }
     };
@@ -717,6 +872,9 @@ const puzzleCard = document.getElementById('puzzle-card')!;
 
 function triggerPuzzle(chapterId: number): void {
   puzzleOverlay.style.display = 'flex';
+  if ((window as any).showMobileController) {
+    (window as any).showMobileController(false);
+  }
   
   if (chapterId === 1) {
     renderTeaEtiquettePuzzle();
@@ -816,11 +974,13 @@ function renderTeaEtiquettePuzzle(): void {
       if (steps.length === 2 && steps[0] === '漱口茶' && steps[1] === '饮茶') {
         showInkAlert('茶仪雅致', '黛玉端起“老君眉”含了一口漱过，吐在吐盂里，然后洗手毕，方捧起“普洱茶”细细饮用。<br/>贾母与凤姐见了，无不暗赞这姑娘举止娴雅，体统大方。好感度与才情上升！', () => {
           puzzleOverlay.style.display = 'none';
-          stateManager.nextChapter();
-          updateHUD();
-          window.dispatchEvent(new CustomEvent('dialogue-ended'));
-          dialogueEngine.startChapter(2);
-          renderDialogueNode();
+          showRedChamberNotebook(1, () => {
+            stateManager.nextChapter();
+            updateHUD();
+            window.dispatchEvent(new CustomEvent('dialogue-ended'));
+            dialogueEngine.startChapter(2);
+            renderDialogueNode();
+          });
         });
         stateManager.changeAffection('daiyu', 15);
         stateManager.changePersonality('daiyu', 'wit', 15);
@@ -954,9 +1114,11 @@ function renderRestoreJadePuzzle(): void {
         showInkAlert('碎玉重圆', '你将最后一瓣碎玉拼合，只见玉身合缝，流光溢彩，八字重现，通灵宝玉安然无恙。<br/>黛玉拭去眼泪，破涕为笑。你获得了随身宝物：【通灵宝玉】！', () => {
           stateManager.addItem('通灵宝玉');
           puzzleOverlay.style.display = 'none';
-          stateManager.nextChapter();
-          updateHUD();
-          window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          showRedChamberNotebook(2, () => {
+            stateManager.nextChapter();
+            updateHUD();
+            window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          });
         });
         stateManager.changeAffection('daiyu', 15);
         stateManager.changePersonality('daiyu', 'melancholy', -15);
@@ -1015,9 +1177,11 @@ function renderLockPuzzle(): void {
       if (puzzleSolver.solveGoldLockPuzzle(currentInput)) {
         showInkAlert('金玉良缘', '只听金锁铮鏦一声，字迹金光灿然。<br/>宝钗微微红了脸，好感度上升！', () => {
           puzzleOverlay.style.display = 'none';
-          stateManager.nextChapter();
-          updateHUD();
-          window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          showRedChamberNotebook(3, () => {
+            stateManager.nextChapter();
+            updateHUD();
+            window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          });
         });
         stateManager.changeAffection('baochai', 15);
         stateManager.changeWorldlyValue('in', 5);
@@ -1082,9 +1246,11 @@ function renderCoupletPuzzle(): void {
           if (puzzleSolver.solveCouplet('怡红院', ans)) {
             showInkAlert('大观园匾成', '贾政点头叹道：““红香绿玉”倒也写实。”<br/>大观园题匾大功告成！', () => {
               puzzleOverlay.style.display = 'none';
-              stateManager.nextChapter();
-              updateHUD();
-              window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              showRedChamberNotebook(4, () => {
+                stateManager.nextChapter();
+                updateHUD();
+                window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              });
             });
             stateManager.changeWorldlyValue('out', 10);
           } else {
@@ -1158,9 +1324,11 @@ function renderAvoidancePuzzle(): void {
           if (res.success) {
             showInkAlert('避嫌成功', '宝钗叫道：“颦儿，我看你往哪里躲！”<br/>小红和坠儿推窗一看是宝姑娘，登时松了一口气。避嫌成功！', () => {
               puzzleOverlay.style.display = 'none';
-              stateManager.nextChapter();
-              updateHUD();
-              window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              showRedChamberNotebook(5, () => {
+                stateManager.nextChapter();
+                updateHUD();
+                window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              });
             });
             stateManager.changeAffection('baochai', res.affectionChange);
           } else {
@@ -1229,9 +1397,11 @@ function renderBuryFlowersPuzzle(): void {
         showInkAlert('葬花知音', '“花谢花飞花满天，红消香断有谁怜……”<br/>两心相契，林黛玉好感度大幅上升！', () => {
           stateManager.removeItem('落花绢袋');
           puzzleOverlay.style.display = 'none';
-          stateManager.nextChapter();
-          updateHUD();
-          window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          showRedChamberNotebook(6, () => {
+            stateManager.nextChapter();
+            updateHUD();
+            window.dispatchEvent(new CustomEvent('dialogue-ended'));
+          });
         });
         stateManager.changeAffection('daiyu', 20);
         stateManager.changeWorldlyValue('out', 10);
@@ -1278,9 +1448,11 @@ function renderTearFanPuzzle(): void {
           if (晴雯喜悦 >= 50) {
             showInkAlert('晴雯一笑', '晴雯拍手娇笑：“撕得痛快！二爷果然知心。”<br/>主仆言归于好！', () => {
               puzzleOverlay.style.display = 'none';
-              stateManager.nextChapter();
-              updateHUD();
-              window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              showRedChamberNotebook(7, () => {
+                stateManager.nextChapter();
+                updateHUD();
+                window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              });
             });
           } else {
             render();
@@ -1357,9 +1529,11 @@ function renderRhymePuzzle(): void {
           if (reply === '双管迎春分外红') {
             showInkAlert('酒令终毕', '宝玉对道：“双管迎春分外红！”<br/>宝钗赞叹，好感度上升！', () => {
               puzzleOverlay.style.display = 'none';
-              stateManager.nextChapter();
-              updateHUD();
-              window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              showRedChamberNotebook(9, () => {
+                stateManager.nextChapter();
+                updateHUD();
+                window.dispatchEvent(new CustomEvent('dialogue-ended'));
+              });
             });
             stateManager.changeAffection('baochai', 10);
           } else {
@@ -1448,14 +1622,18 @@ function renderSearchHidePuzzle(): void {
       showInkAlert('风波保全', '抄检无果，晴雯与众姐妹逃过此劫。<br/>大观园保全了清誉！出世度大幅上升！', () => {
         stateManager.removeItem('火折子');
         puzzleOverlay.style.display = 'none';
-        triggerEnding();
+        showRedChamberNotebook(10, () => {
+          triggerEnding();
+        });
       });
       stateManager.changeWorldlyValue('out', 20);
     } else {
       showInkAlert('大祸临头', `糟糕！王善保家的搜出了敏感物件：【${res.exposedItems.join(', ')}】！<br/>晴雯被逐，大观园走向离散悲剧。`, () => {
         stateManager.removeItem('火折子');
         puzzleOverlay.style.display = 'none';
-        triggerEnding();
+        showRedChamberNotebook(10, () => {
+          triggerEnding();
+        });
       });
       stateManager.changeWorldlyValue('out', 10);
     }
@@ -1539,67 +1717,86 @@ game.events.once('ready', () => {
 });
 
 // 12. 选关卡/回目跳转功能绑定
-const chapterSelect = document.getElementById('chapter-select') as HTMLSelectElement;
-chapterSelect.onchange = (e: any) => {
-  const chapterId = parseInt((e.target as HTMLSelectElement).value, 10);
-  if (isNaN(chapterId) || chapterId < 1 || chapterId > 10) return;
+// 12. 自定义选关卡/回目跳转功能绑定
+const customSelect = document.getElementById('chapter-custom-select')!;
+const selectBtn = document.getElementById('chapter-select-btn')!;
 
-  // 1. 设置状态机回目并更新HUD
-  stateManager.setChapter(chapterId);
-
-  // 2. 根据回目自动填充道具，以便测试
-  stateManager.removeItem('通灵宝玉');
-  stateManager.removeItem('落花绢袋');
-  stateManager.removeItem('金麒麟');
-  stateManager.removeItem('火折子');
-  
-  if (chapterId >= 3) stateManager.addItem('通灵宝玉');
-  if (chapterId >= 6) stateManager.addItem('落花绢袋');
-  if (chapterId >= 9) stateManager.addItem('金麒麟');
-  if (chapterId >= 10) stateManager.addItem('火折子');
-
-  // 初始化相关羁绊与个性（给一个中等偏优的初始状态以防直接出家或进死局）
-  if (chapterId >= 6) {
-    stateManager.changeAffection('daiyu', 45 - stateManager.getState().daiyuAffection);
-    stateManager.changePersonality('daiyu', 'melancholy', 40 - stateManager.getState().daiyuMelancholy);
-    stateManager.changePersonality('daiyu', 'wit', 60 - stateManager.getState().daiyuWit);
-  }
-  if (chapterId >= 8) {
-    stateManager.changeAffection('baochai', 45 - stateManager.getState().baochaiAffection);
-  }
-
-  updateHUD();
-
-  // 3. 关闭所有对话与解谜遮罩
-  document.getElementById('dialogue-box')!.style.display = 'none';
-  document.getElementById('puzzle-overlay')!.style.display = 'none';
-
-  // 4. 重置/加载对应场景
-  let targetScene = 'GameScene';
-  if (chapterId === 6) {
-    targetScene = 'XiaoxiangScene';
-  } else if (chapterId === 7 || chapterId === 8 || chapterId === 10) {
-    targetScene = 'YihongScene';
-  }
-
-  // 5. 切换 Phaser 场景并开始对应关卡对话
-  const activeScenes = game.scene.getScenes(true);
-  activeScenes.forEach(s => {
-    game.scene.stop(s.scene.key);
-  });
-
-  game.scene.start(targetScene, {
-    onTriggerPlot: triggerPlotCallback
-  });
-
-  // 开始对话
-  dialogueEngine.startChapter(chapterId);
-  renderDialogueNode();
-  
-  // 6. 播放声音并收起锦囊
-  playStoneClickSound();
-  closeHUD();
+selectBtn.onclick = (e) => {
+  e.stopPropagation(); // 阻止冒泡，避免 window 点击事件立刻关闭菜单
+  customSelect.classList.toggle('open');
 };
+
+// 点击页面其他部分关闭下拉菜单
+window.addEventListener('click', () => {
+  customSelect.classList.remove('open');
+});
+
+// 选项代理绑定
+const dropdownItems = document.querySelectorAll('.chapter-dropdown-item');
+dropdownItems.forEach(item => {
+  item.addEventListener('click', (e) => {
+    const target = e.currentTarget as HTMLElement;
+    const chapterId = parseInt(target.getAttribute('data-value') || '1', 10);
+    if (isNaN(chapterId) || chapterId < 1 || chapterId > 10) return;
+
+    // 1. 设置状态机回目并更新HUD
+    stateManager.setChapter(chapterId);
+
+    // 2. 根据回目自动填充道具，以便测试
+    stateManager.removeItem('通灵宝玉');
+    stateManager.removeItem('落花绢袋');
+    stateManager.removeItem('金麒麟');
+    stateManager.removeItem('火折子');
+    
+    if (chapterId >= 3) stateManager.addItem('通灵宝玉');
+    if (chapterId >= 6) stateManager.addItem('落花绢袋');
+    if (chapterId >= 9) stateManager.addItem('金麒麟');
+    if (chapterId >= 10) stateManager.addItem('火折子');
+
+    // 初始化相关羁绊与个性（给一个中等偏优的初始状态以防直接出家或进死局）
+    if (chapterId >= 6) {
+      stateManager.changeAffection('daiyu', 45 - stateManager.getState().daiyuAffection);
+      stateManager.changePersonality('daiyu', 'melancholy', 40 - stateManager.getState().daiyuMelancholy);
+      stateManager.changePersonality('daiyu', 'wit', 60 - stateManager.getState().daiyuWit);
+    }
+    if (chapterId >= 8) {
+      stateManager.changeAffection('baochai', 45 - stateManager.getState().baochaiAffection);
+    }
+
+    updateHUD();
+
+    // 3. 关闭所有对话与解谜遮罩
+    document.getElementById('dialogue-box')!.style.display = 'none';
+    document.getElementById('puzzle-overlay')!.style.display = 'none';
+
+    // 4. 重置/加载对应场景
+    let targetScene = 'GameScene';
+    if (chapterId === 6) {
+      targetScene = 'XiaoxiangScene';
+    } else if (chapterId === 7 || chapterId === 8 || chapterId === 10) {
+      targetScene = 'YihongScene';
+    }
+
+    // 5. 切换 Phaser 场景并开始对应关卡对话
+    const activeScenes = game.scene.getScenes(true);
+    activeScenes.forEach(s => {
+      game.scene.stop(s.scene.key);
+    });
+
+    game.scene.start(targetScene, {
+      onTriggerPlot: triggerPlotCallback
+    });
+
+    // 开始对话
+    dialogueEngine.startChapter(chapterId);
+    renderDialogueNode();
+    
+    // 6. 播放声音并收起锦囊与下拉菜单
+    playStoneClickSound();
+    customSelect.classList.remove('open');
+    closeHUD();
+  });
+});
 
 // 9. 游戏启动
 updateHUD();
@@ -1610,6 +1807,50 @@ renderDialogueNode();
 const hudPanel = document.getElementById('hud-panel')!;
 const hudToggleBtn = document.getElementById('hud-toggle-btn')!;
 const hudCloseBtn = document.getElementById('hud-close-btn')!;
+
+// 10.1 沉浸全屏控制绑定
+const fullscreenBtn = document.getElementById('hud-fullscreen-btn')!;
+const fullscreenText = document.getElementById('fullscreen-btn-text')!;
+
+function toggleFullscreen(): void {
+  const docEl = document.documentElement as any;
+  const doc = document as any;
+
+  const requestFS = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+  const exitFS = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    if (requestFS) {
+      requestFS.call(docEl).then(() => {
+        fullscreenText.innerText = '窗口';
+        playStoneClickSound();
+        setTimeout(resizeApp, 150); // 延迟少许确保全屏容器resize计算准确
+      }).catch(() => {});
+    }
+  } else {
+    if (exitFS) {
+      exitFS.call(doc).then(() => {
+        fullscreenText.innerText = '全屏';
+        playStoneClickSound();
+        setTimeout(resizeApp, 150);
+      }).catch(() => {});
+    }
+  }
+}
+
+fullscreenBtn.onclick = () => {
+  toggleFullscreen();
+};
+
+// 监听系统全屏变化事件，自动同步按钮状态与画面大小
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) {
+    fullscreenText.innerText = '窗口';
+  } else {
+    fullscreenText.innerText = '全屏';
+  }
+  resizeApp();
+});
 
 function openHUD(): void {
   hudPanel.classList.add('active');
@@ -1677,3 +1918,122 @@ function initAudioOnUserInteraction(): void {
 }
 
 initAudioOnUserInteraction();
+
+// 13. 移动端控制与缩放系统
+(window as any).mobileControls = {
+  left: false,
+  right: false,
+  up: false,
+  down: false,
+  interact: false,
+  nav: false
+};
+
+(window as any).showMobileController = function(show: boolean): void {
+  const controller = document.getElementById('mobile-controller');
+  if (controller) {
+    controller.style.display = show ? '' : 'none';
+  }
+};
+
+function initMobileControls(): void {
+  const upBtn = document.getElementById('dpad-up');
+  const downBtn = document.getElementById('dpad-down');
+  const leftBtn = document.getElementById('dpad-left');
+  const rightBtn = document.getElementById('dpad-right');
+  const navBtn = document.getElementById('action-nav');
+  const interactBtn = document.getElementById('action-interact');
+
+  if (!upBtn || !downBtn || !leftBtn || !rightBtn || !navBtn || !interactBtn) return;
+
+  const bindPress = (btn: HTMLElement, key: string) => {
+    const start = (e: Event) => {
+      e.preventDefault();
+      (window as any).mobileControls[key] = true;
+    };
+    const end = (e: Event) => {
+      e.preventDefault();
+      (window as any).mobileControls[key] = false;
+    };
+    
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', end);
+    btn.addEventListener('pointerout', end);
+    btn.addEventListener('touchstart', start);
+    btn.addEventListener('touchend', end);
+    btn.addEventListener('touchcancel', end);
+  };
+
+  bindPress(upBtn, 'up');
+  bindPress(downBtn, 'down');
+  bindPress(leftBtn, 'left');
+  bindPress(rightBtn, 'right');
+  bindPress(navBtn, 'nav');
+  bindPress(interactBtn, 'interact');
+}
+
+function resizeApp(): void {
+  const app = document.getElementById('app');
+  if (!app) return;
+  const targetWidth = 1024;
+  const targetHeight = 768;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  
+  const isPortrait = windowHeight > windowWidth;
+
+  if (isPortrait) {
+    // 智能竖屏旋转适配：顺时针旋转90度，使宽变高，高变宽以最大化可视面积
+    const scale = Math.min(windowWidth / targetHeight, windowHeight / targetWidth);
+    app.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${scale})`;
+  } else {
+    // 正常横屏适配
+    const scale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
+    app.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+}
+
+initMobileControls();
+window.addEventListener('resize', resizeApp);
+window.addEventListener('orientationchange', resizeApp);
+resizeApp();
+
+function initObserver(): void {
+  const dialogueBox = document.getElementById('dialogue-box')!;
+  const puzzleOverlay = document.getElementById('puzzle-overlay')!;
+  const notebookOverlay = document.getElementById('notebook-overlay')!;
+  
+  const checkVisibility = () => {
+    const dialogueHidden = dialogueBox.style.display === 'none';
+    const puzzleHidden = puzzleOverlay.style.display === 'none';
+    const notebookHidden = !notebookOverlay.classList.contains('show');
+    
+    if (dialogueHidden && puzzleHidden && notebookHidden) {
+      if ((window as any).showMobileController) {
+        (window as any).showMobileController(true);
+      }
+    } else {
+      if ((window as any).showMobileController) {
+        (window as any).showMobileController(false);
+      }
+    }
+  };
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
+        checkVisibility();
+      }
+    });
+  });
+
+  observer.observe(dialogueBox, { attributes: true, attributeFilter: ['style'] });
+  observer.observe(puzzleOverlay, { attributes: true, attributeFilter: ['style'] });
+  observer.observe(notebookOverlay, { attributes: true, attributeFilter: ['class'] });
+  
+  checkVisibility();
+}
+
+initObserver();
+
+

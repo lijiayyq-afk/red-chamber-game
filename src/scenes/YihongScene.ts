@@ -158,8 +158,13 @@ export class YihongScene extends Phaser.Scene {
 
     if (!this.cursors || !this.player) return;
 
+    const isMobileNav = (window as any).mobileControls?.nav;
+
     // 红叶寻航导航
-    if (Phaser.Input.Keyboard.JustDown(this.keyH)) {
+    if (Phaser.Input.Keyboard.JustDown(this.keyH) || isMobileNav) {
+      if (isMobileNav) {
+        (window as any).mobileControls.nav = false;
+      }
       this.triggerNavigation();
     }
 
@@ -168,18 +173,18 @@ export class YihongScene extends Phaser.Scene {
     let vx = 0;
     let vy = 0;
 
-    if (this.cursors.left?.isDown) {
+    if (this.cursors.left?.isDown || (window as any).mobileControls?.left) {
       vx = -speed;
       this.lastDirection = 'left';
-    } else if (this.cursors.right?.isDown) {
+    } else if (this.cursors.right?.isDown || (window as any).mobileControls?.right) {
       vx = speed;
       this.lastDirection = 'right';
     }
 
-    if (this.cursors.up?.isDown) {
+    if (this.cursors.up?.isDown || (window as any).mobileControls?.up) {
       vy = -speed;
       this.lastDirection = 'up';
-    } else if (this.cursors.down?.isDown) {
+    } else if (this.cursors.down?.isDown || (window as any).mobileControls?.down) {
       vy = speed;
       this.lastDirection = 'down';
     }
@@ -199,15 +204,21 @@ export class YihongScene extends Phaser.Scene {
 
     // NPC 与物体交互检查
     let isNearInteractive = false;
+    const isMobileInteract = (window as any).mobileControls?.interact;
 
     // 1. 靠近晴雯，触发撕扇
     const distToQingwen = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.qingwenSprite.x, this.qingwenSprite.y);
     if (distToQingwen < 85) {
       isNearInteractive = true;
       const bounceY = Math.sin(this.time.now / 150) * 4;
-      this.interactTip.setText('按 E 键 对话').setPosition(this.qingwenSprite.x, this.qingwenSprite.y - 60 + bounceY).setVisible(true);
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const promptText = isTouch ? '点击【交互】/按E键' : '按 E 键 对话';
+      this.interactTip.setText(promptText).setPosition(this.qingwenSprite.x, this.qingwenSprite.y - 60 + bounceY).setVisible(true);
 
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyE) || isMobileInteract) {
+        if (isMobileInteract) {
+          (window as any).mobileControls.interact = false;
+        }
         this.player.setVelocity(0, 0);
         this.player.setPosition(this.qingwenSprite.x - 65, this.qingwenSprite.y);
         this.player.anims.play('baoyu-idle-right', true);
@@ -226,9 +237,14 @@ export class YihongScene extends Phaser.Scene {
     if (!isNearInteractive && this.player.x < 180 && this.player.y < 260) {
       isNearInteractive = true;
       const bounceY = Math.sin(this.time.now / 150) * 4;
-      this.interactTip.setText('按 E 键 卧床休养').setPosition(120, 160 + bounceY).setVisible(true);
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const promptText = isTouch ? '点击【交互】/按E键' : '按 E 键 卧床休养';
+      this.interactTip.setText(promptText).setPosition(120, 160 + bounceY).setVisible(true);
 
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyE) || isMobileInteract) {
+        if (isMobileInteract) {
+          (window as any).mobileControls.interact = false;
+        }
         this.player.setVelocity(0, 0);
         this.player.setPosition(180, 260); // 止步
         this.player.anims.play('baoyu-idle-up', true);

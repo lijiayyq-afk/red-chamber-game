@@ -34,7 +34,11 @@ body {
 }
 
 #app {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
   width: 1024px;
   height: 768px;
   background-color: #000; /* Phaser 容器底色 */
@@ -452,3 +456,383 @@ body {
   color: var(--text-ink);
   margin-bottom: 20px;
 }
+
+/* 虚拟方向盘与控制层 */
+#mobile-controller {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 95;
+  display: none; /* 默认隐藏 */
+}
+
+/* 仅在支持触控的粗指针设备或屏幕较小（<1024px）时才显示触控面板 */
+@media (pointer: coarse) or (max-width: 1024px) {
+  #mobile-controller {
+    display: block;
+  }
+}
+
+/* D-pad 虚拟十字方向键圆盘 */
+.dpad-container {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  width: 160px;
+  height: 160px;
+  background: rgba(252, 250, 242, 0.65); /* 宣纸微透 */
+  backdrop-filter: blur(5px);
+  border: 2px solid var(--gold-juan);
+  border-radius: 50%;
+  pointer-events: auto; /* 允许点击 */
+  box-shadow: 0 10px 25px rgba(43, 33, 22, 0.15);
+  box-sizing: border-box;
+}
+
+/* D-pad 圆盘正中心的玉佩雕花图案装饰 */
+.dpad-center-decor {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 60px;
+  height: 60px;
+  border: 1.5px dashed rgba(44, 94, 67, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cursive);
+  font-size: 0.85rem;
+  color: rgba(44, 94, 67, 0.4);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 虚拟方向按钮 */
+.dpad-btn {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #fbfaf5, #f0ede4); /* 玉米黄古纸纸感 */
+  border: 1.5px solid var(--gold-juan);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cursive);
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: var(--text-ink);
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:active {
+  transform: scale(0.9);
+  background: var(--gold-juan);
+  color: var(--red-zhu);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* 上下左右定位 */
+.dpad-btn.up {
+  top: 6px;
+  left: 58px;
+}
+.dpad-btn.down {
+  bottom: 6px;
+  left: 58px;
+}
+.dpad-btn.left {
+  left: 6px;
+  top: 58px;
+}
+.dpad-btn.right {
+  right: 6px;
+  top: 58px;
+}
+
+/* 右下角功能键容器 */
+.action-container {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  pointer-events: auto;
+}
+
+/* 交互大按钮（朱砂红） */
+.action-btn-interact {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #c94040, var(--red-zhu));
+  border: 2px solid var(--gold-juan);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-cursive);
+  font-size: 1.25rem;
+  font-weight: bold;
+  box-shadow: 0 6px 15px rgba(178, 45, 45, 0.35);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-btn-interact:active {
+  transform: scale(0.9);
+  background: #902222;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.action-btn-interact span {
+  font-size: 0.65rem;
+  font-family: var(--font-serif);
+  opacity: 0.85;
+  margin-top: -2px;
+}
+
+/* 寻路小按钮（黛绿） */
+.action-btn-nav {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #3d7e5b, var(--green-dai));
+  border: 1.5px solid var(--gold-juan);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-cursive);
+  font-size: 1.05rem;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(44, 94, 67, 0.3);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 8px; /* 稍微错开高度，符合右手操作生理结构 */
+}
+
+.action-btn-nav:active {
+  transform: scale(0.9);
+  background: #1e422f;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.action-btn-nav span {
+  font-size: 0.55rem;
+  font-family: var(--font-serif);
+  opacity: 0.85;
+  margin-top: -1px;
+}
+
+/* 自定义古风选关菜单 */
+.chapter-custom-select {
+  position: relative;
+  display: inline-block;
+}
+
+.chapter-select-btn {
+  background: var(--bg-paper);
+  border: 1px solid var(--gold-juan);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  color: var(--text-ink);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.chapter-select-btn:hover {
+  border-color: var(--red-zhu);
+  background: #fbf8f0;
+}
+
+.chapter-select-btn::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--text-muted);
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.chapter-custom-select.open .chapter-select-btn::after {
+  transform: rotate(180deg);
+}
+
+.chapter-dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  width: 160px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--bg-paper);
+  border: 1.5px solid var(--gold-juan);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(43, 33, 22, 0.2);
+  z-index: 150;
+  display: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-juan) transparent;
+}
+
+.chapter-custom-select.open .chapter-dropdown-list {
+  display: block;
+}
+
+.chapter-dropdown-item {
+  padding: 6px 12px;
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  color: var(--text-ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px dashed rgba(216, 195, 165, 0.4);
+  text-align: left;
+}
+
+.chapter-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.chapter-dropdown-item:hover {
+  background: var(--red-zhu);
+  color: #fff;
+  padding-left: 16px;
+}
+
+.chapter-dropdown-item.active {
+  color: var(--red-zhu);
+  font-weight: bold;
+  background: rgba(178, 45, 45, 0.05);
+}
+
+/* 全屏切换按钮 */
+.hud-fullscreen-btn {
+  animation: jade-pulse-blue 3s infinite ease-in-out;
+}
+
+.hud-fullscreen-btn:hover {
+  transform: scale(1.1) rotate(-5deg) !important;
+  box-shadow: 0 6px 15px rgba(178, 45, 45, 0.25) !important;
+  border-color: var(--red-zhu) !important;
+}
+
+@keyframes jade-pulse-blue {
+  0% {
+    box-shadow: 0 0 0 0 rgba(216, 195, 165, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(216, 195, 165, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(216, 195, 165, 0);
+  }
+}
+
+/* 红楼研读札记学术小课堂浮层 */
+.notebook-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(30, 30, 30, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 180;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.notebook-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notebook-card {
+  width: 580px;
+  max-height: 85%;
+  overflow-y: auto;
+  background-color: #faf7ed;
+  background-image: radial-gradient(rgba(216, 195, 165, 0.12) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  border-left: 14px solid #7c3a2d; /* 左木轴 */
+  border-right: 14px solid #7c3a2d; /* 右木轴 */
+  border-top: 4px solid var(--gold-juan);
+  border-bottom: 4px solid var(--gold-juan);
+  border-radius: 4px;
+  padding: 30px 45px;
+  box-shadow: 0 25px 65px rgba(0,0,0,0.45);
+  text-align: center;
+  position: relative;
+  transform: scale(0.8);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-sizing: border-box;
+}
+
+.notebook-overlay.show .notebook-card {
+  transform: scale(1);
+}
+
+.notebook-title {
+  font-family: var(--font-cursive);
+  font-size: 2.2rem;
+  color: var(--red-zhu);
+  margin-bottom: 15px;
+  border-bottom: 2px dashed var(--gold-juan);
+  padding-bottom: 8px;
+}
+
+.notebook-section-title {
+  font-family: var(--font-cursive);
+  font-size: 1.35rem;
+  color: var(--green-dai);
+  text-align: left;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--green-dai);
+  padding-left: 8px;
+  font-weight: bold;
+}
+
+.notebook-body {
+  font-size: 0.98rem;
+  line-height: 1.8;
+  color: var(--text-ink);
+  text-align: left;
+  margin-bottom: 25px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-juan) transparent;
+}
+
+.notebook-footer {
+  margin-top: 15px;
+}
+
+

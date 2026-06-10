@@ -159,8 +159,13 @@ export class XiaoxiangScene extends Phaser.Scene {
 
     if (!this.cursors || !this.player) return;
 
+    const isMobileNav = (window as any).mobileControls?.nav;
+
     // 红叶寻航导航
-    if (Phaser.Input.Keyboard.JustDown(this.keyH)) {
+    if (Phaser.Input.Keyboard.JustDown(this.keyH) || isMobileNav) {
+      if (isMobileNav) {
+        (window as any).mobileControls.nav = false;
+      }
       this.triggerNavigation();
     }
 
@@ -169,18 +174,18 @@ export class XiaoxiangScene extends Phaser.Scene {
     let vx = 0;
     let vy = 0;
 
-    if (this.cursors.left?.isDown) {
+    if (this.cursors.left?.isDown || (window as any).mobileControls?.left) {
       vx = -speed;
       this.lastDirection = 'left';
-    } else if (this.cursors.right?.isDown) {
+    } else if (this.cursors.right?.isDown || (window as any).mobileControls?.right) {
       vx = speed;
       this.lastDirection = 'right';
     }
 
-    if (this.cursors.up?.isDown) {
+    if (this.cursors.up?.isDown || (window as any).mobileControls?.up) {
       vy = -speed;
       this.lastDirection = 'up';
-    } else if (this.cursors.down?.isDown) {
+    } else if (this.cursors.down?.isDown || (window as any).mobileControls?.down) {
       vy = speed;
       this.lastDirection = 'down';
     }
@@ -201,12 +206,19 @@ export class XiaoxiangScene extends Phaser.Scene {
     // 靠近黛玉，按E交互触发剧情
     let isNearInteractive = false;
     const distToDaiyu = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.daiyuSprite.x, this.daiyuSprite.y);
+    const isMobileInteract = (window as any).mobileControls?.interact;
+
     if (distToDaiyu < 85) {
       isNearInteractive = true;
       const bounceY = Math.sin(this.time.now / 150) * 4;
-      this.interactTip.setPosition(this.daiyuSprite.x, this.daiyuSprite.y - 60 + bounceY).setVisible(true);
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const promptText = isTouch ? '点击【交互】/按E键' : '按 E 键 交互';
+      this.interactTip.setText(promptText).setPosition(this.daiyuSprite.x, this.daiyuSprite.y - 60 + bounceY).setVisible(true);
 
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyE) || isMobileInteract) {
+        if (isMobileInteract) {
+          (window as any).mobileControls.interact = false;
+        }
         this.player.setVelocity(0, 0);
         this.player.setPosition(this.daiyuSprite.x - 65, this.daiyuSprite.y); // 强制并排站立
         this.player.anims.play('baoyu-idle-right', true);
